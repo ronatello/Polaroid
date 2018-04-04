@@ -10,15 +10,16 @@
          {% if messages %}
             <ul>
                {% for message in messages %}
-               <li<{{ message }}</li>
+               <li>{{ message }}</li>
                {% endfor %}
             </ul>
          {% endif %}
       {% endwith %}
 		
-      <h1>Flask Message Flashing Example</h1>
+      <h1>Dog balls</h1>
       <p>Do you want to <a href = "{{ url_for('login') }}">
          <b>log in?</b></a></p>
-      
+      <p><a href="{{ url_for('register') }}"> Register </a></p>
+
    </body>
 </html>
