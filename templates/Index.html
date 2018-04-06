@@ -8,15 +8,11 @@
    
       {% with messages = get_flashed_messages() %}
          {% if messages %}
-            <ul>
-               {% for message in messages %}
-               <li>{{ message }}</li>
-               {% endfor %}
-            </ul>
+                  {{ messages[-1] }}
          {% endif %}
       {% endwith %}
 		
-      <h1>Dog balls</h1>
+      <h1>Welcome</h1>
       <p>Do you want to <a href = "{{ url_for('login') }}">
          <b>log in?</b></a></p>
       <p><a href="{{ url_for('register') }}"> Register </a></p>
