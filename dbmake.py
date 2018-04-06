@@ -28,7 +28,7 @@ class UserData(Base) :
 	__tablename__ = 'userdata'
 
 	id = Column(Integer() , primary_key = True)
-	user_id = Column(Integer, ForeignKey('user.id'))
+	user_id = Column(Integer, ForeignKey('userauth.id'))
 	bio = Column(String(250))
 	image = Column(String(150))
 
@@ -49,7 +49,7 @@ class UserData(Base) :
 
 	# more individual update things 
 
-	def all-details(self, bio, display_picture) :
+	def all_details(self, bio, display_picture) :
 		self.bio = bio 
 		self.display_picture = display_picture
 
@@ -57,6 +57,6 @@ class UserData(Base) :
 
 Base.metadata.create_all(engine)
 
-# Person = session.query(Users).first()
+# Person = session.query(UserData).filter_by(Foreig.first()
 
-# print (Person.username, " " , Person.password)
+# print (Person.bio)

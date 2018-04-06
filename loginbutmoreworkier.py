@@ -77,8 +77,13 @@ def add_details() :
 
   if request.method == 'POST' :
     user_details = dbmake.UserData()
-    user_details.all_details()
+    user_details.all_details(bio = request.form['bio'] , display_picture = request.form['display_picture'])
+    db.session.add(user_details)
+    db.session.commit()
+    return redirect(url_for('index'))
 
+
+  return render_template('add_details.html')
 
 if __name__ == "__main__" :
    app.run(debug = True)
