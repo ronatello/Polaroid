@@ -3,10 +3,11 @@
 	<title> Add Details </title>
 </head>
 <body>
-	<form action = "/adddetails/" method=post >
+	<form action = "/adddetails/" method=post enctype="multipart/form-data">
 		Bio : 
 	<input type=text name=bio>
 		Display Picture :
-	<input type="file" accept="image/*" name=display_picture>
+	<input type="file" accept="image/*" name="file">
+	<input type="submit" name="submit" value="Submit">
 	</form>
 </body>

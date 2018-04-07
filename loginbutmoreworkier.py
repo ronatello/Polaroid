@@ -1,6 +1,8 @@
 from flask import Flask, flash, redirect, render_template, request, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from os import urandom
+from os import path
+from werkzeug.security import check_password_hash
 import dbmake
 
 
@@ -20,10 +22,6 @@ def index():
    return render_template('Index.html')
 
 
-# @app.route('/')
-# def index():
-#    return render_template('Index.html')
-
 @app.route('/logout/')
 def logout():
    session.pop('username', None)
@@ -39,8 +37,10 @@ def login():
       if usercorrect == None : 
         flash ("Sorry! Username invalid !")
         return redirect(url_for('index'))
+
       
-      if usercorrect.password != request.form['password'] : 
+      enter = check_password_hash(usercorrect.password,request.form['password'])
+      if enter == False  : 
           flash ("Sorry! Password incorrect!")
           return redirect(url_for('index'))
       
@@ -71,13 +71,23 @@ def register():
 
   return render_template('register.html')
 
+
+
 @app.route('/adddetails/' , methods = ['GET' , 'POST'])
 def add_details() : 
   ''' Fill up user details after registering '''
 
+  APP_ROOT = path.dirname(path.abspath(__file__))
   if request.method == 'POST' :
     user_details = dbmake.UserData()
-    user_details.all_details(bio = request.form['bio'] , display_picture = request.form['display_picture'])
+    target = path.join(APP_ROOT , 'ImageRepo/')
+
+    destination = "/".join([target,""])
+    
+    pp = request.files['file']
+    pp.save(destination)
+
+    user_details.all_details(bio = request.form['bio'] , display_picture = pp)
     db.session.add(user_details)
     db.session.commit()
     return redirect(url_for('index'))
