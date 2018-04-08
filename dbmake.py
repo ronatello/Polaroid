@@ -34,14 +34,13 @@ class UserData(Base) :
 	one_thing = relationship(Users, backref=backref('other_thing', uselist=False))
 	#user_id = Column(Integer(), ForeignKey('userauth.id'))
 	bio = Column(String(250))
-	image = Column(String(150))
+	image = Column(String(250))
 
 	# user = relationship(Users)
 
 	def __init__(self) :
 		self.bio = None 
 		self.posts = None
-		self.display_picture = None
 
 	def bio_update() :
 		pass
@@ -53,25 +52,16 @@ class UserData(Base) :
 
 	def all_details(self, bio, display_picture) :
 		self.bio = bio 
-		self.display_picture = display_picture
+		self.dimage = display_picture
 
 	def get_id(self) : 
 		return self.id ; 
 
 Base.metadata.create_all(engine)
 
-#Person = session.query(Users).filter_by(username = 'Anirudha').first()
-#Person1 = session.query(Users, UserData).filter_by(username = 'Anirudha')
-#Person2 = session.query(UserData)
-
 query=session.query(Users).outerjoin(UserData)
-# for P,P1 in Person1 :
-# 	#print ( P.id , " ", P.username, " ", P.password," ",P1.bio)
-# 	print (P.id," ",P.username," ",P.password, P1.bio)
-#for P1 in Person2:
-#	print (P1.bio)
 
-# for P in query:
-# 	print (P.id,P.username,P.other_thing.bio, P.other_thing.display_picture)
+for P in query:
+	print (P.id,P.username,P.other_thing.bio, P.other_thing.display_picture)
 	
 	

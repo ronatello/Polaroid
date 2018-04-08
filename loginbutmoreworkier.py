@@ -1,7 +1,7 @@
 from flask import Flask, flash, redirect, render_template, request, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from os import urandom
-from os import path
+from os import path, makedirs
 from werkzeug.security import check_password_hash
 import dbmake
 
@@ -55,14 +55,24 @@ def login():
 @app.route('/register/', methods = ['GET' , 'POST'])
 def register(): 
   '''Registration form'''
+  APP_ROOT = path.dirname(path.abspath(__file__))
 
   if request.method == 'POST': 
     new_user = dbmake.Users(username = request.form['username'] , password = request.form['password'])
     usercorrect = db.session.query(dbmake.Users).filter_by(username = new_user.username).first()
     
     if usercorrect == None : 
+      
+      target = path.join(APP_ROOT , 'ImageRepo/')
+      target = path.join(target, request.form['username'])
+      target = path.join(target,"DisplayPicture/")
+      makedirs(target)
+      
+
       db.session.add(new_user)
       db.session.commit()
+      session['username'] = request.form['username']
+
       return redirect(url_for('add_details'))
     
     
@@ -73,21 +83,33 @@ def register():
 
 
 
+ 
+
 @app.route('/adddetails/' , methods = ['GET' , 'POST'])
 def add_details() : 
   ''' Fill up user details after registering '''
+
+  if not hasattr(session, 'username'):
+    return redirect(url_for('login'))
 
   APP_ROOT = path.dirname(path.abspath(__file__))
   if request.method == 'POST' :
     user_details = dbmake.UserData()
     target = path.join(APP_ROOT , 'ImageRepo/')
+    target = path.join(target, session['username'])
+    target = path.join(target,"DisplayPicture/")
 
-    destination = "/".join([target,""])
+    # if not path.exists(target) :
+    #   makedirs(target)
+
+    #destination = "/".join([target,"pp"])
     
     pp = request.files['file']
-    pp.save(destination)
+    pp.save(path.join(target,"pp"))
 
-    user_details.all_details(bio = request.form['bio'] , display_picture = pp)
+    ImageLocation = "ImageRepo/"+session['username']+"/DisplayPicture/pp.jpeg"
+    print("!!!!!",ImageLocation)
+    user_details.all_details(bio = request.form['bio'] , display_picture = ImageLocation)
     db.session.add(user_details)
     db.session.commit()
     return redirect(url_for('index'))
