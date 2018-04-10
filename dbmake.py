@@ -59,15 +59,19 @@ class UserData(Base) :
 		return self.id ; 
 
 class UserPosts(Base) : 
-	'''Contains all information pertaining to a post and ties it with the user that has posted it'''
+	'''Contains all information pertaining to a post and ties it with the user that has posted it.
+		Likes, users that have liked, comments and respective users, tags nrn, share, pinned posts(?), tagging people, crop'''
 	
 	__tablename__ = 'postcontent'
 
 	id = Column(Integer() , primary_key = True , autoincrement = True) 
-	user_id = Column(Integer(), ForeignKey(Users.id), autoincrement = True)
-	post = relationship(Users, backref = backref('user', uselist = False))
+	p=0 
+	user_id = Column(Integer(), ForeignKey(Users.id))
+	post = relationship(Users)
 	caption = Column(Text())
 	image = Column(String(150))
+	llikes = Column(Integer())
+	ccomments = Column(Integer())
 
 	def get_id(self) : 
 		return self.user_id
@@ -75,10 +79,64 @@ class UserPosts(Base) :
 	def get_post_id(self) : 
 		return self.id
 
-	def __init__ ( self, caption , image, user) :
+	def __init__ ( self, caption, users) :
 		self.caption = caption 
-		self.image = image 
-		self.user_id = user
+		self.user_id = users
+		self.llikes = 0
+		self.comment = 0
+
+	def returnp(self) :
+		return self.__class__.p
+
+	def url_image(self, image):
+		self.image = image
+
+	def like_post(self, userid):
+		post_like = Likes(userid, self.id) # we get user id by using session['username']
+		self.llikes += 1
+		session.add(post_like)
+		session.commit()
+
+	def comment_post(self, userid, comment) : 
+		post_comment = Comments(userid, self.id , comment)
+		self.comment += 1
+		session.add(post_comment)
+		session.commit()
+
+
+class Likes(Base):
+
+
+	__tablename__ = 'postlikes'
+
+	id = Column(Integer(), primary_key = True, autoincrement = True)
+	user_id = Column(Integer(), ForeignKey(Users.id))
+	post_id = Column(Integer(), ForeignKey(UserPosts.id))
+	likepost = relationship(UserPosts, backref = backref('lpost', uselist = False))
+	likeuser = relationship(Users, backref = backref('luser', uselist = False))
+
+	def __init__(self, userid, postid):
+		self.user_id = userid
+		self.post_id = postid
+
+class Comments(Base):
+
+	__tablename__ = 'postcomments'
+
+	id = Column(Integer(), primary_key = True, autoincrement = True)
+	user_id = Column(Integer(), ForeignKey(Users.id))
+	post_id = Column(Integer(), ForeignKey(UserPosts.id))
+	comment = Column(Text())
+	commentpost = relationship(UserPosts, backref = backref('cpost', uselist = False))
+	commentuser = relationship(Users, backref = backref('cuser', uselist = False))
+
+	def __init__(self, userid, postid, comment):
+		self.user_id = userid
+		self.post_id = postid
+		self.comment = comment
+
+
+
 
 
 
