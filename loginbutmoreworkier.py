@@ -34,8 +34,8 @@ def login():
    
    if request.method == 'POST':
       usercorrect =  db.session.query(dbmake.Users).filter_by(username = request.form['username'] ).first()     
+      
       if usercorrect == None : 
-        flash ("Sorry! Username invalid !")
         return redirect(url_for('index'))
 
       
@@ -47,7 +47,7 @@ def login():
       else:
 
         session['username'] = request.form['username']
-        return redirect(url_for('index'))
+        return redirect(url_for('profile'))
 
    return render_template('Login.html', error = error)
 
@@ -63,7 +63,7 @@ def register():
     
     if usercorrect == None : 
       
-      target = path.join(APP_ROOT , 'ImageRepo/')
+      target = path.join(APP_ROOT , 'static/ImageRepo/')
       target = path.join(target, request.form['username'])
       target = path.join(target,"DisplayPicture/")
       makedirs(target)
@@ -89,13 +89,13 @@ def register():
 def add_details() : 
   ''' Fill up user details after registering '''
 
-  if not hasattr(session, 'username'):
-    return redirect(url_for('login'))
+  # if not hasattr(session, 'username'):
+  #   return redirect(url_for('login'))
 
   APP_ROOT = path.dirname(path.abspath(__file__))
   if request.method == 'POST' :
     user_details = dbmake.UserData()
-    target = path.join(APP_ROOT , 'ImageRepo/')
+    target = path.join(APP_ROOT , 'static/ImageRepo/')
     target = path.join(target, session['username'])
     target = path.join(target,"DisplayPicture/")
 
@@ -107,8 +107,8 @@ def add_details() :
     pp = request.files['file']
     pp.save(path.join(target,"pp"))
 
-    ImageLocation = "ImageRepo/"+session['username']+"/DisplayPicture/pp.jpeg"
-    print("!!!!!",ImageLocation)
+    ImageLocation = "../static/ImageRepo/"+session['username']+"/DisplayPicture/pp"
+
     user_details.all_details(bio = request.form['bio'] , display_picture = ImageLocation)
     db.session.add(user_details)
     db.session.commit()
@@ -116,6 +116,20 @@ def add_details() :
 
 
   return render_template('add_details.html')
+
+
+@app.route('/user_profile/' , methods = ['GET', 'POST'])
+def profile() : 
+  ''' User profile '''
+
+  user = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+  
+  bio = user.usr.bio
+
+  display_picture = user.usr.image
+
+  return render_template('profile.html', bio = bio, display_picture = display_picture, username = user.username)   
+
 
 if __name__ == "__main__" :
    app.run(debug = True)
