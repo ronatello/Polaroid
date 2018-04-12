@@ -3,9 +3,9 @@
 	<title> Profile </title>
 </head>
 <body>
-	<h2> Welcome, {{ username }}</h2>
-	<a href= {{ url_for('add_post')}} > Add post </a>
+	<h2>{{ username }}</h2>
 	<p> Bio : {{ bio }} </p>
+	<a href="/follow/{{userid}}" type="button">Wanna lick me?</a>
 	<img src= {{ display_picture }} style="width:400px height:500px" />
 	<br>
 	<br>
@@ -13,7 +13,6 @@
 	<p> Posts :</p>
 	{% for post in posts %}
 	<img src= {{ post.image }} style = "width:400px height:500px" />
-	<button onclick={{ post.like_post(thisuserid) }} value="Like">
 	{% endfor %}
 </body>
 </html>

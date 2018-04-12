@@ -84,6 +84,7 @@ class UserPosts(Base) :
 		self.user_id = users
 		self.llikes = 0
 		self.comment = 0
+		self.__class__.p += 1
 
 	def returnp(self) :
 		return self.__class__.p
@@ -136,9 +137,19 @@ class Comments(Base):
 		self.comment = comment
 
 
+class Follows(Base):
 
+	__tablename__ = 'userfollows'
 
+	id = Column(Integer(), primary_key = True, autoincrement = True)
+	follower_id = Column(Integer())
+	following_id = Column(Integer())
 
+	def __init__(self, follower, following):
+		self.follower_id = follower
+		self.following_id = following
+
+		
 
 Base.metadata.create_all(engine)
 

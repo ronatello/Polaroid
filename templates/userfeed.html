@@ -1,0 +1,17 @@
+<html>
+<head>
+	<title>
+	Home! 
+	</title>
+</head>
+<body>
+	{% for post in posts %}
+		
+		<img src={{ post.image }} style = "width:400px height:500px">
+		<p> {{ post.caption}} </p>
+		<br>
+
+	{% endfor %}
+
+</body>
+</html>
