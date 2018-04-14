@@ -62,15 +62,26 @@ def register():
   '''Registration form'''
   APP_ROOT = path.dirname(path.abspath(__file__))
 
+  error = None
+
   if request.method == 'POST': 
     new_user = dbmake.Users(username = request.form['username'] , password = request.form['password'])
     usercorrect = db.session.query(dbmake.Users).filter_by(username = new_user.username).first()
     
     if usercorrect == None : 
       
-      if not new_user.password == request.form['password1'] :
-        flash("Sorry! Passwords not matching!")
-        return redirect(url_for('index'))
+      print ( request.form['username'], " " , request.form['password'] )  
+      if not request.form['password']  :
+        error = "Please enter data into all fields "       
+        return render_template(('register.html'), error = error )
+
+      if not request.form['username']  :
+        error = "Please enter data into all fields "       
+        return render_template(('register.html'), error = error )
+
+      if not request.form['password'] == request.form['password1'] :
+        error = "Passwords do not match"
+        return render_template(("register.html") , error = error)
 
       target = path.join(APP_ROOT , 'static/ImageRepo/')
       target = path.join(target, request.form['username'])
@@ -84,10 +95,11 @@ def register():
       return redirect(url_for('add_details'))
     
     
-    flash("Sorry! Username already exists !")
-    return redirect(url_for('index'))
+    error = "Username already exists"
+    return render_template(("register.html") , error = error)
 
-  return render_template('register.html')
+  error = None 
+  return render_template(('register.html'), error = None )
  
 
 @app.route('/adddetails/' , methods = ['GET' , 'POST'])
@@ -119,7 +131,7 @@ def add_details() :
     user_details.all_details(bio = request.form['bio'] , display_picture = ImageLocation)
     db.session.add(user_details)
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('profile'))
 
 
   return render_template('add_details.html')
