@@ -1,17 +1,82 @@
 <html>
 <head>
 	<title>
-	Home! 
+		Home! 
 	</title>
+	<script
+	src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
 </head>
 <body>
+
 	{% for post in posts %}
-		
-		<img src={{ post.image }} style = "width:400px height:500px">
-		<p> {{ post.caption}} </p>
-		<br>
+
+	<img src={{ post.image }} style = "width:400px height:500px">
+	<p> {{ post.caption}} </p>
+	<div class = "like" >
+		<button type="button" class="like_btn" data-attr="" data-target="{{ post.id }}" >Like {{ post.llikes }}</button>
+	</div> 
+	<div class="comment_class" >
+		<ul id="commentlist_{{post.id}}"> </ul>
+	</div>
+
+<!-- 	<h4> Add Comment </h4>
+	<input type="text" id="com">
+	<button type="button" class="add-comment" data-attr = "" data-target="{{post.id}}"> Post </button>
+	<br> -->
 
 	{% endfor %}
 
+	<script>
+		$(document).ready(function() {
+			$('button.like_btn').on('click', function() {
+				let $btn = $(this);
+				let is_liked = $btn.hasClass('liked');
+				let post_id = $btn.attr('data-target');
+				let like_id = $btn.attr('data-attr');
+				$.ajax({
+					url: '/feed/',
+					method: "POST",
+					data: {
+						post_id: post_id,
+						unlike: is_liked,
+						like_id: like_id,
+					},
+					success: function(response) {
+						$btn.toggleClass('liked');
+						let new_count = response['count'];
+						let like_id = response['like_id'];
+						$btn.text('Like ' + String(new_count));
+						// s$btn.addClass('liked'); 
+					}
+				});
+			});
+
+/*			$('button.add-comment').on('click', function() {
+				let $btn = $(this);
+
+				let post_id = $btn.attr('data-target');
+				let comment_id = $btn.attr('data-attr');
+				let comment = $('#com')
+				let changelistthing = "commentlist_" + post_id
+
+				$.ajax({
+					url: '/comments/',
+					method: "POST",
+					data: {
+						post_id: post_id,
+						comment_id: comment_id,
+					},
+					success: function(response) {
+
+						let comment_id = response['comment_id'];
+						changelistthing.append('<li>' + comment + '</li>')
+
+					}
+				});
+			});*/
+		});	
+	</script>
 </body>
 </html>

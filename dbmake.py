@@ -4,13 +4,17 @@ from sqlalchemy.orm import relationship , sessionmaker, backref
 from sqlalchemy import create_engine
 from werkzeug.security import generate_password_hash
 
+
 Base = declarative_base()
 engine = create_engine('sqlite:///elephant.db')
 
+
 Base.metadata.bind = engine
+
 
 eleSession = sessionmaker(bind = engine)
 session = eleSession() 
+
 
 class Users(Base) : 
 	'''Table containing user authentication details '''
@@ -65,7 +69,7 @@ class UserPosts(Base) :
 	__tablename__ = 'postcontent'
 
 	id = Column(Integer() , primary_key = True , autoincrement = True) 
-	p=0 
+	p = 0 
 	user_id = Column(Integer(), ForeignKey(Users.id))
 	post = relationship(Users)
 	caption = Column(Text())
@@ -78,12 +82,11 @@ class UserPosts(Base) :
 
 	def get_post_id(self) : 
 		return self.id
-
 	def __init__ ( self, caption, users) :
 		self.caption = caption 
 		self.user_id = users
 		self.llikes = 0
-		self.comment = 0
+		self.ccomment = 0
 		self.__class__.p += 1
 
 	def returnp(self) :
@@ -92,11 +95,18 @@ class UserPosts(Base) :
 	def url_image(self, image):
 		self.image = image
 
+	def retnolikes(self) : 
+		return self.llikes
+
 	def like_post(self, userid):
+		self.llikes = self.llikes + 1
 		post_like = Likes(userid, self.id) # we get user id by using session['username']
-		self.llikes += 1
 		session.add(post_like)
 		session.commit()
+
+	def unlike_post(self):
+		self.llikes = self.llikes - 1
+
 
 	def comment_post(self, userid, comment) : 
 		post_comment = Comments(userid, self.id , comment)
@@ -114,7 +124,7 @@ class Likes(Base):
 	user_id = Column(Integer(), ForeignKey(Users.id))
 	post_id = Column(Integer(), ForeignKey(UserPosts.id))
 	likepost = relationship(UserPosts, backref = backref('lpost', uselist = False))
-	likeuser = relationship(Users, backref = backref('luser', uselist = False))
+	# likeuser = relationship(Users, backref = backref('luser', uselist = False))
 
 	def __init__(self, userid, postid):
 		self.user_id = userid
@@ -149,7 +159,19 @@ class Follows(Base):
 		self.follower_id = follower
 		self.following_id = following
 
-		
+	
+class Tags(Base) :
+
+	__tablename__ = 'picturetags'
+
+	id = Column(Integer(), primary_key = True , autoincrement = True)
+	post_id = Column(Integer())
+	tag_text = Column(Text())
+
+	def __init__(self , postid, tagtext) :
+		self.post_id = postid
+		self.tag_text = tagtext 
+
 
 Base.metadata.create_all(engine)
 

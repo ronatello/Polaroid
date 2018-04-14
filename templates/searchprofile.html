@@ -5,7 +5,15 @@
 <body>
 	<h2>{{ username }}</h2>
 	<p> Bio : {{ bio }} </p>
+	
+	{% if followflag %}
+	<a href="/unfollow/{{userid}}" type="button"> No lick anymore </a>
+
+	{% else %}
 	<a href="/follow/{{userid}}" type="button">Wanna lick me?</a>
+	
+	{% endif %}
+
 	<img src= {{ display_picture }} style="width:400px height:500px" />
 	<br>
 	<br>

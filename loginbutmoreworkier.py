@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, url_for, session
+from flask import Flask, flash, redirect, render_template, request, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from os import urandom
 from os import path, makedirs
@@ -19,8 +19,8 @@ def index():
    if 'username' in session:
       username = session['username']
       return 'Logged in as ' + username + '<br>' + \
-         "<b><a href = '/logout'>click here to log out</a></b>"
-   return render_template('Index.html')
+              "<b><a href = '/logout'>click here to log out</a></b>"
+   return render_template('Login.html')
 
 
 @app.route('/logout/')
@@ -31,26 +31,30 @@ def logout():
 
 @app.route('/login/', methods = ['GET', 'POST'])
 def login():
-   error = None
+  '''Login form'''   
+  error = None
    
-   if request.method == 'POST':
-      usercorrect =  db.session.query(dbmake.Users).filter_by(username = request.form['username'] ).first()     
+  if request.method == 'POST':
       
-      if usercorrect == None : 
-        return redirect(url_for('index'))
+      usercorrect =  db.session.query(dbmake.Users).filter_by( username = request.form['username'] ).first()
+
+      
+      if usercorrect == None: 
+        error = "Username not found"
+        return render_template(('Login.html') , error = error)
 
       
       enter = check_password_hash(usercorrect.password,request.form['password'])
-      if enter == False  : 
-          flash ("Sorry! Password incorrect!")
-          return redirect(url_for('index'))
+      
+      if enter == False  :
+          error = "Password does not match username"
+          return render_template(('Login.html'), error =error)
       
       else:
-
         session['username'] = request.form['username']
         return redirect(url_for('profile'))
 
-   return render_template('Login.html', error = error)
+  return render_template('Login.html', error = None)
 
 
 @app.route('/register/', methods = ['GET' , 'POST'])
@@ -64,12 +68,15 @@ def register():
     
     if usercorrect == None : 
       
+      if not new_user.password == request.form['password1'] :
+        flash("Sorry! Passwords not matching!")
+        return redirect(url_for('index'))
+
       target = path.join(APP_ROOT , 'static/ImageRepo/')
       target = path.join(target, request.form['username'])
       target = path.join(target,"DisplayPicture/")
       makedirs(target)
       
-
       db.session.add(new_user)
       db.session.commit()
       session['username'] = request.form['username']
@@ -151,6 +158,15 @@ def add_post() :
     
     target = path.join(APP_ROOT , 'static/ImageRepo/')
     target = path.join(target, session['username'])
+
+    tag1 = request.form['tag1']
+    tag2 = request.form['tag2']
+    tag3 = request.form['tag3']
+    tag4 = request.form['tag4']
+    tag5 = request.form['tag5']
+
+    if tag1 :
+      tag1 = dbmake.Tags()
     
     pp = request.files['file']
 
@@ -185,13 +201,49 @@ def searchprofile() :
 
     thisuser = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
 
-    return render_template('searchprofile.html', username=userprof.username, bio = bio, display_picture = display_picture, posts = posts, thisuserid=thisuser.id, userid=userprof.id)
+    followflag = []
+
+    followflag = db.session.query(dbmake.Follows).filter_by(follower_id = thisuser.id, following_id = userprof.id ).first()
+
+    return render_template('searchprofile.html', username=userprof.username, bio = bio, display_picture = display_picture, posts = posts, thisuserid=thisuser.id, userid=userprof.id, followflag = followflag)
 
   return render_template('searchperson.html')
 
 @app.route('/feed/' , methods = ['GET' , 'POST'])
 def feed() :
   ''' User's feed '''
+
+  if request.method == 'POST':
+    
+    post_id = request.form['post_id']
+    like_id = request.form['like_id']
+    unlike = request.form['unlike']
+
+    posttobeupdated = db.session.query(dbmake.UserPosts).filter_by(id = post_id).first()
+    print(posttobeupdated.retnolikes())
+    userupdating = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+    print(userupdating.id)
+    print(unlike)
+
+    if unlike == "true" : 
+      print("Postneeds to be unlikesd")
+      posttobeupdated.unlike_post()
+      db.session.query(dbmake.Likes).filter_by(post_id = posttobeupdated.id , user_id = userupdating.id).delete()
+      likeid=""
+      db.session.commit()
+
+    else : 
+      print("Post needs to be liked")
+      posttobeupdated.like_post(userupdating.id)
+      likep = db.session.query(dbmake.Likes).filter_by(user_id = userupdating.id , post_id = posttobeupdated.id).first()
+      likeid = likep.id
+      db.session.commit()
+
+    like_count = posttobeupdated.retnolikes()
+    print(like_count)
+
+    return jsonify({'count' : like_count, 'like_id' : likeid })
+    
 
   f_id = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
 
@@ -204,21 +256,47 @@ def feed() :
       posts.append(singlepost)
 
   posts.sort(key = lambda x : x.id , reverse = True)
-
-  print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
   
-  for p in posts : 
-    print (p.id)
-
-  print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-
   return render_template('userfeed.html', posts = posts)
+
+
+
+@app.route('/comments/', methods = ['GET', 'POST'])
+def comment() : 
+
+  if request.method == 'POST' : 
+
+    post_id = request.form['post_id']
+    comment_id = request.form['comment_id']   
+
+    print(post_id , " " , comment_id , " " , request.form['comment'])
+
+    posttobeupdated = db.session.query(dbmake.UserPosts).filter_by(id = post_id).first() 
+    userupdating = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+
+    posttobeupdated.comment_post(userupdating.id, request.form['comment'])
+    
+    comment_id = db.session.query(dbmake.Comments).filter_by(user_id = userupdating.id , post_id = posttobeupdated.id).first()
+
+    db.session.commit()
+
+    return jsonify({'count' : like_count, 'comment_id' : comment_id.id })
+
+
 
 @app.route('/follow/<id>', methods = ['GET', 'POST'])
 def followperson(id):
   thisuser = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
   follow=dbmake.Follows(thisuser.id, id)
   db.session.add(follow)
+  db.session.commit()
+  return render_template('searchperson.html')
+
+
+@app.route('/unfollow/<id>', methods = ['GET', 'POST'])
+def unfollowperson(id):
+  thisuser = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+  db.session.query(dbmake.Follows).filter_by(follower_id = thisuser.id, following_id = id ).delete()
   db.session.commit()
   return render_template('searchperson.html')
 

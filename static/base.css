@@ -1,0 +1,27 @@
+html,body
+		{
+				/*height: 100%;*/
+				margin: 0px; 
+				padding: 0px;
+				scroll-behavior: smooth;
+				max-width: 100vw;	 	
+		}
+
+.bgimg0
+		{
+			display: flex;
+			margin: 0px;
+			height:100vh;
+			background-image: url('Images/tumblr_mvs201ekjt1r46py4o1_1280.jpg');
+			background-attachment: fixed;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+			margin-bottom: 0px;
+			/*width: 100vw;*/
+		}
+
+.transparencythingy
+		{
+			
+		}
