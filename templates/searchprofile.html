@@ -7,10 +7,10 @@
 	<p> Bio : {{ bio }} </p>
 	
 	{% if followflag %}
-	<a href="/unfollow/{{userid}}" type="button"> No lick anymore </a>
+	<a href="/unfollow/{{userid}}" type="button"> Unfollow </a>
 
 	{% else %}
-	<a href="/follow/{{userid}}" type="button">Wanna lick me?</a>
+	<a href="/follow/{{userid}}" type="button">Follow</a>
 	
 	{% endif %}
 

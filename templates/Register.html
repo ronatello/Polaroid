@@ -3,13 +3,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title> | Poloroid </title>
+	<title> | Polaroid</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
 	<link rel="stylesheet" href="../static/register.css">
 	<link href="https://fonts.googleapis.com/css?family=Euphoria+Script|Merienda|Poiret+One" rel="stylesheet"> 
 </head>
 <body>
-	<div id="carousel" class="carousel slide carousel-fade" data-ride="carousel" data-interval="5000" data-wrap="true">
+	<div id="carousel" class="carousel slide carousel-fade" data-ride="carousel" data-interval="10000" data-wrap="true">
   		<div class="carousel-inner">
     		<div class="carousel-item active">
     			<img class="d-block w-100" src="../static/Images/register1.jpg" alt="First slide">
@@ -29,7 +29,7 @@
   		</div>
 	</div>
 	<div class="clearfix">
-		<form action="/register/" method="post" class="form-signin" id="RegForm" >
+		<form class="form-signin" id="Register" action="/register/" method="post">
 			<div class="form-group">
 				<h2 class="title">
 					New Here?
@@ -47,13 +47,11 @@
 			<div class="form-group">
 				<input type="password" class="form-control" name="password1" placeholder="Re-type Password">
 			</div>
-			<div class="form-group">
 			{% if error %}
-            	<p class="ErrorMessage" style="color : red"><strong>Error:</strong> {{ error }} </p>
-        	 {% endif %}	
-        	</div>
+            <p class="ErrorMessage"><strong>Error:</strong> {{ error }} </p>
+         	{% endif %}
 			<div class="form-group">
-				<a href="javascript:;" role="button" class="btn btn-primary" id="registerbutton" onclick="document.getElementById('RegForm').submit();">Register</a>
+				<a href="javascript:;" role="button" class="btn btn-primary" id="registerbutton" onclick="document.getElementById('Register').submit();">Register</a>
 			</div>
 			<div class="form-group" id="backtologin">
 				Already have an account? <a href="/login/" class="text-muted" id="backtologinlink">Log in</a>

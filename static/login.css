@@ -3,7 +3,7 @@ body {
     padding: 0;
 	display: flex;
 	align-items: center;
-	background-image: url('Images/instest-login-alt.jpg');
+	background-image: url('../static/Images/instest-login-alt.jpg');
 	background-size: cover;
 	background-position: 0vh -14vh;
 	z-index: 1;
@@ -15,11 +15,8 @@ form.form-signin {
 	width: 100%;
 	max-width: 330px;
 	position:absolute;
+	border-radius: 10%;
     top:30%;
-    text-align: center;
-    align-items: center;
-    align-content: center;
-    align-self: center;
     right:0;
     left:0;
     z-index: 20;
@@ -39,7 +36,7 @@ input.form-control::placeholder {
 	text-align: center;
 }
 
-#loginbutton {
+a#loginbutton {
 	background-color: #d377ef;
 	width: 100%;
 	opacity: 0.7;
@@ -55,11 +52,6 @@ input.form-control::placeholder {
 	width: 100%;
 	opacity: 0.7;
 	border-color: transparent;
-}
-
-.ErrorMessage{
-	color: red ;
-	opacity: 0.7 ;
 }
 
 input.form-control {
@@ -113,6 +105,15 @@ border-radius: 0rem;
 border-bottom-width: 2px;
  }
 
+ .form-signin {
+ 	text-align: center;
+ 	color: #a30e40;
+ }
+
+.ErrorMessage {
+	color: #a30e40;
+}
+
  @keyframes welcomeLoadBg{
  	0% {
  		opacity: 0;
@@ -120,12 +121,4 @@ border-bottom-width: 2px;
  	100% {
  		opacity: 1;
  	}
-}
-
-.ErrorMessage{
-	opacity: 0.7 ; 
-	color : red ;
-	font-family: "Segoe UI", sans-serif ;
-	text-align : center;	
-	font-size: 0.5rem;
-}
+ }

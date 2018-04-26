@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title> | Instest</title>
+	<title> | Polaroid</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
 	<link rel="stylesheet" href="../static/profile.css">
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:100,200" rel="stylesheet">
@@ -16,7 +16,7 @@
 			<div class="col-lg-9 col-sm-6"  id="coverpicture">
 				<div class="coverpicture">
 					<div class="profileline">
-						<img class="profilepic" src="../static/Images/me.jpg">
+						<img class="profilepic" src='{{ display_picture }}'>
 					</div>
 				</div>
 			</div>
@@ -24,10 +24,10 @@
 		<div class="row">
 			<div class="col-lg-9 col-sm-6">
 				<h2 class="usernametext">
-					| aaronst.ein
+					| {{ username }}
 				</h2>
 				<h6 class="text-muted" id="biotext">
-					I guess I have to write a long bio now but the thing is i'm not used to writing bios especially for retarded things like this.
+					{{ bio }}
 				</h6>
 				<br>
 				<br>
@@ -37,33 +37,25 @@
 				</h5>
 				<br>
 				<div class="row postrow">
+					{% if not posts %}
+					<h3>
+						User has no posts
+					</h3>
+					{% endif %}
+					{% for p in posts %}
 					<div class="imagepost">
-						<a data-target="#exampleModalLong" data-toggle="modal">
-							<img src="../static/Images/register4.jpg" class="post">
+						<a data-target="#imageModal" data-toggle="modal">
+							<img src='{{ p.image }}' class="post">
 						</a>
 					</div>
-					<div class="imagepost">
-						<a data-target="#exampleModalLong" data-toggle="modal">
-							<img src="../static/Images/register4.jpg" class="post">
-						</a>
-					</div>
-					<div class="imagepost">
-						<a data-target="#exampleModalLong" data-toggle="modal">
-							<img src="../static/Images/register4.jpg" class="post">
-						</a>
-					</div>
-					<div class="imagepost">
-						<a data-target="#exampleModalLong" data-toggle="modal">
-							<img src="../static/Images/register4.jpg" class="post">
-						</a>
-					</div>
+					{% endfor %}
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Modal -->
-				<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+				<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="ModalView" aria-hidden="true">
   					<div class="modal-dialog">
     					<div class="modal-content">
 				      <div class="modal-body">
@@ -72,7 +64,7 @@
 				        </button>
 				        <img src="../static/Images/register4.jpg" class="modalpost">
 				        <div class="written">
-				        	<p class="comment"><span class="commentuser">aaronst.ein  </span>A big skyscraper!</p>
+				        	<p class="comment"><span class="commentuser">{{ username }}  </span>Look at my post!</p>
 				        </div>
 				      </div>
 				    </div>

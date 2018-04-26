@@ -5,7 +5,7 @@ from os import path, makedirs
 from werkzeug.security import check_password_hash
 import itertools
 import dbmake
-
+import re
 
 app = Flask(__name__)
 app.secret_key = urandom(26)
@@ -17,9 +17,10 @@ db = SQLAlchemy(app)
 @app.route('/')
 def index():
    if 'username' in session:
-      username = session['username']
-      return 'Logged in as ' + username + '<br>' + \
-              "<b><a href = '/logout'>click here to log out</a></b>"
+      return redirect(url_for('profile'))
+      # username = session['username']
+      # return 'Logged in as ' + username + '<br>' + \
+      #         "<b><a href = '/logout'>click here to log out</a></b>"
    return render_template('Login.html')
 
 
@@ -36,6 +37,17 @@ def login():
    
   if request.method == 'POST':
       
+      # if '/' in request.form['username'] :
+      #   error = "Invalid character in username"
+      #   return render_template(('Login.html'), error = error )
+      
+      u = str(request.form['username'])
+
+      if not re.search(u'^[A-Za-z0-9.]', u):
+        error = "Invalid character in username"
+        return render_template(('Login.html'), error = error )
+      
+
       usercorrect =  db.session.query(dbmake.Users).filter_by( username = request.form['username'] ).first()
 
       
@@ -65,23 +77,30 @@ def register():
   error = None
 
   if request.method == 'POST': 
+      
+    u = str(request.form['username'])
+
+    if not re.search(u'^[A-Za-z0-9.]', u):
+      error = "Invalid character in username"
+      return render_template(('Register.html'), error = error )
+
+
     new_user = dbmake.Users(username = request.form['username'] , password = request.form['password'])
     usercorrect = db.session.query(dbmake.Users).filter_by(username = new_user.username).first()
     
     if usercorrect == None : 
       
-      print ( request.form['username'], " " , request.form['password'] )  
       if not request.form['password']  :
         error = "Please enter data into all fields "       
-        return render_template(('register.html'), error = error )
+        return render_template(('Register.html'), error = error )
 
       if not request.form['username']  :
         error = "Please enter data into all fields "       
-        return render_template(('register.html'), error = error )
+        return render_template(('Register.html'), error = error )
 
       if not request.form['password'] == request.form['password1'] :
         error = "Passwords do not match"
-        return render_template(("register.html") , error = error)
+        return render_template(("Register.html") , error = error)
 
       target = path.join(APP_ROOT , 'static/ImageRepo/')
       target = path.join(target, request.form['username'])
@@ -96,10 +115,10 @@ def register():
     
     
     error = "Username already exists"
-    return render_template(("register.html") , error = error)
+    return render_template(("Register.html") , error = error)
 
   error = None 
-  return render_template(('register.html'), error = None )
+  return render_template(('Register.html'), error = None )
  
 
 @app.route('/adddetails/' , methods = ['GET' , 'POST'])
@@ -147,7 +166,10 @@ def profile() :
 
   display_picture = user.usr.image
 
-  return render_template('profile.html', bio = bio, display_picture = display_picture, username = user.username)   
+  posts = []
+  posts = db.session.query(dbmake.UserPosts).filter_by(user_id = user.id).all()
+
+  return render_template('Profile.html', bio = bio, display_picture = display_picture, username = user.username, posts = posts)   
 
 
 def allowed_file(filename):
@@ -171,14 +193,14 @@ def add_post() :
     target = path.join(APP_ROOT , 'static/ImageRepo/')
     target = path.join(target, session['username'])
 
-    tag1 = request.form['tag1']
-    tag2 = request.form['tag2']
-    tag3 = request.form['tag3']
-    tag4 = request.form['tag4']
-    tag5 = request.form['tag5']
+    # tag1 = request.form['tag1']
+    # tag2 = request.form['tag2']
+    # tag3 = request.form['tag3']
+    # tag4 = request.form['tag4']
+    # tag5 = request.form['tag5']
 
-    if tag1 :
-      tag1 = dbmake.Tags()
+    # if tag1 :
+    #   tag1 = dbmake.Tags()
     
     pp = request.files['file']
 
