@@ -17,14 +17,6 @@
 	<div class = "like" >
 		<button type="button" class="like_btn" data-attr="" data-target="{{ post.id }}" >Like {{ post.llikes }}</button>
 	</div> 
-	<div class="comment_class" >
-		<ul id="commentlist_{{post.id}}"> </ul>
-	</div>
-
-<!-- 	<h4> Add Comment </h4>
-	<input type="text" id="com">
-	<button type="button" class="add-comment" data-attr = "" data-target="{{post.id}}"> Post </button>
-	<br> -->
 
 	{% endfor %}
 
@@ -44,11 +36,15 @@
 						like_id: like_id,
 					},
 					success: function(response) {
-						$btn.toggleClass('liked');
 						let new_count = response['count'];
+						//console.log(response['count']);
 						let like_id = response['like_id'];
+						let change = response['change'];
 						$btn.text('Like ' + String(new_count));
-						// s$btn.addClass('liked'); 
+						if (change == 1){
+							$btn.toggleClass('liked');
+						}
+						// $btn.addClass('liked'); 
 					}
 				});
 			});

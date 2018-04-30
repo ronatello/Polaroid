@@ -246,75 +246,137 @@ def searchprofile() :
 @app.route('/feed/' , methods = ['GET' , 'POST'])
 def feed() :
   ''' User's feed '''
-
   if request.method == 'POST':
-    
-    post_id = request.form['post_id']
-    like_id = request.form['like_id']
-    unlike = request.form['unlike']
 
-    posttobeupdated = db.session.query(dbmake.UserPosts).filter_by(id = post_id).first()
-    print(posttobeupdated.retnolikes())
-    userupdating = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
-    print(userupdating.id)
-    print(unlike)
+  		change = 1
+  		post_id = request.form['post_id']
+  		likeid = request.form['like_id']
+  		unlike = request.form['unlike']
+  		like_count = 0
+  		flag = 1
+  		posttobeupdated = db.session.query(dbmake.UserPosts).filter_by(id = post_id).first()
+  		print(posttobeupdated.retnolikes())
+  		userupdating = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+  		print(userupdating.id)
+  		print(unlike)
 
-    if unlike == "true" : 
-      print("Postneeds to be unlikesd")
-      posttobeupdated.unlike_post()
-      db.session.query(dbmake.Likes).filter_by(post_id = posttobeupdated.id , user_id = userupdating.id).delete()
-      likeid=""
-      db.session.commit()
+  		ifliked = db.session.query(dbmake.Likes).filter_by(post_id = post_id , user_id = userupdating.id).first()
+  		# print (ifliked)
 
-    else : 
-      print("Post needs to be liked")
-      posttobeupdated.like_post(userupdating.id)
-      likep = db.session.query(dbmake.Likes).filter_by(user_id = userupdating.id , post_id = posttobeupdated.id).first()
-      likeid = likep.id
-      db.session.commit()
+  		if unlike == "true" : 
+  			print("Postneeds to be unlikesd")
+  			db.session.query(dbmake.Likes).filter_by(post_id = posttobeupdated.id , user_id = userupdating.id).delete()
+  			likeid=""
 
-    like_count = posttobeupdated.retnolikes()
-    print(like_count)
+  			upl = db.session.query(dbmake.Likes).filter_by(post_id = post_id).all() 	
+  			i = 0
+  			for a in upl :
+  				i = i +1
 
-    return jsonify({'count' : like_count, 'like_id' : likeid })
-    
+  			posttobeupdated.update_likecount(nol = i)
+  			like_count = posttobeupdated.retnolikes()
+  			print("LIKE COUNT = "+str(like_count))
+
+  			db.session.commit()
+
+  		else : 
+
+  			print("Post needs to be liked")
+  			pid = posttobeupdated.get_post_id()
+  			print(pid)
+
+  			if ifliked== None  :
+  				l = dbmake.Likes(userid = userupdating.id, postid = post_id)
+  				print(l.id)
+  				# posttobeupdated.like_post()
+  				db.session.add(l)
+  				db.session.commit()
+  				likep = db.session.query(dbmake.Likes).filter_by(id = l.id).first()
+  				likeid = likep.id  				
+
+  			upl = db.session.query(dbmake.Likes).filter_by(post_id = post_id).all() 
+  			i = 0
+  			for a in upl :
+  				i = i +1 
+
+  			print ("1 ) i --- ", i )
+  			posttobeupdated.update_likecount(nol = i) 
+  			like_count = posttobeupdated.retnolikes() - 1
+  			like_count = like_count + 1
+  			print("1 ) like count ==== ", like_count) 			
+
+  			if ifliked !=None :
+  				likeid = ""
+  				like_count = like_count - 1 
+  				print("inside if of ifliked thing")
+  				db.session.query(dbmake.Likes).filter_by(post_id = posttobeupdated.id , user_id = userupdating.id).delete()
+  				change = 0
+  				db.session.commit()
+
+  			upl = db.session.query(dbmake.Likes).filter_by(post_id = post_id).all()
+  			i = 0
+  			if upl :
+  				for a in upl :
+  					i = i +1   			
+
+  			posttobeupdated.update_likecount(nol = i) 
+  			like_count = posttobeupdated.retnolikes() - 1
+  			like_count = like_count + 1
+
+  		db.session.commit()
+
+  		return jsonify({'count' : like_count , 'like_id' : likeid , 'change' : change })
+
+
 
   f_id = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
-
   follows = db.session.query(dbmake.Follows).filter_by(follower_id = f_id.id).all()
   posts=[]  
 
   for follow in follows:
-    picturelist = db.session.query(dbmake.UserPosts).filter_by(user_id = follow.following_id).all()
-    for singlepost in picturelist:
-      posts.append(singlepost)
+  	picturelist = db.session.query(dbmake.UserPosts).filter_by(user_id = follow.following_id).all()
+  	for singlepost in picturelist:
+  		posts.append(singlepost)
 
   posts.sort(key = lambda x : x.id , reverse = True)
-  
-  return render_template('userfeed.html', posts = posts)
+
+   	# comments=[]
+
+   	# for p in posts : 
+   	# 	comments.append(db.session.query(dbmake.Comments).filter_by(post_id = p.id))
+
+  return render_template('userfeed.html', posts=posts )
 
 
 
-@app.route('/comments/', methods = ['GET', 'POST'])
-def comment() : 
+@app.route('/comments/<postid>', methods = ['GET', 'POST'])
+def comment(postid) : 
 
   if request.method == 'POST' : 
 
-    post_id = request.form['post_id']
-    comment_id = request.form['comment_id']   
+    userid = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+    comment = request.form['cmnts']
 
-    print(post_id , " " , comment_id , " " , request.form['comment'])
+    c = dbmake.Comments(userid = userid , postid = postid , comment = comment)
 
-    posttobeupdated = db.session.query(dbmake.UserPosts).filter_by(id = post_id).first() 
-    userupdating = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
-
-    posttobeupdated.comment_post(userupdating.id, request.form['comment'])
-    
-    comment_id = db.session.query(dbmake.Comments).filter_by(user_id = userupdating.id , post_id = posttobeupdated.id).first()
-
+    db.session.add(c)
     db.session.commit()
 
-    return jsonify({'count' : like_count, 'comment_id' : comment_id.id })
+    return redirect(url_for('feed'))
+
+    # print(post_id , " " , comment_id , " " , request.form['comment'])
+
+    # posttobeupdated = db.session.query(dbmake.UserPosts).filter_by(id = post_id).first() 
+    # userupdating = db.session.query(dbmake.Users).filter_by(username = session['username']).first()
+
+    # posttobeupdated.comment_post(userupdating.id, request.form['comment'])
+    
+    # comment_id = db.session.query(dbmake.Comments).filter_by(user_id = userupdating.id , post_id = posttobeupdated.id).first()
+
+    # db.session.commit()
+
+    # return jsonify({'count' : like_count, 'comment_id' : comment_id.id })
+
 
 
 

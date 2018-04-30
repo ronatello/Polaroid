@@ -82,6 +82,7 @@ class UserPosts(Base) :
 
 	def get_post_id(self) : 
 		return self.id
+
 	def __init__ ( self, caption, users) :
 		self.caption = caption 
 		self.user_id = users
@@ -98,16 +99,20 @@ class UserPosts(Base) :
 	def retnolikes(self) : 
 		return self.llikes
 
-	def like_post(self, userid):
+	def like_post(self):
 		self.llikes = self.llikes + 1
-		post_like = Likes(userid, self.id) # we get user id by using session['username']
-		session.add(post_like)
+		# post_like = Likes(userid = userid, postid = self.id) # we get user id by using session['username']
+		# session.add(post_like)
 		session.commit()
 
 	def unlike_post(self):
 		self.llikes = self.llikes - 1
+		session.commit()
 
-
+	def update_likecount(self, nol) : 
+		self.llikes = nol 
+		session.commit()
+		
 	def comment_post(self, userid, comment) : 
 		post_comment = Comments(userid, self.id , comment)
 		self.comment += 1
